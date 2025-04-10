@@ -3,8 +3,8 @@ interface HeaderProps {
 }
 
 const Header = (props: HeaderProps) => (
-    <header className="">
-        <h1 className="uppercase py-4 text-center text-white font-bold bg-[#1E1E2F]">
+    <header>
+        <h1 className="uppercase py-3 text-center text-white font-bold bg-gray-900">
             AIgorithm & Data Structure simulation.
         </h1>
     </header>

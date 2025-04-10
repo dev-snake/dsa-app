@@ -123,16 +123,30 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
-  :root {
-    --dark-bg: var(--color-dark-bg);
-    --surface: var(--color-surface);
-    --text-main: var(--color-text-main);
-    --text-sub: var(--color-text-sub);
-    --accent: var(--color-accent);
-    --code-bg: var(--color-code-bg);
-  }
+@utility dark-bg {
+  background-color: var(--color-dark-bg);
 }
+
+@utility surface {
+  background-color: var(--color-surface);
+}
+
+@utility text-main {
+  color: var(--color-text-main);
+}
+
+@utility text-sub {
+  color: var(--color-text-sub);
+}
+
+@utility accent {
+  color: var(--color-accent);
+}
+
+@utility code-bg {
+  background-color: var(--color-code-bg);
+}
+
 
 @layer base {
   * {
