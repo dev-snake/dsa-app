@@ -16,7 +16,6 @@ import {
     QueryConstraint,
     DocumentData,
     Query,
-    QuerySnapshot,
     DocumentSnapshot,
     serverTimestamp,
 } from 'firebase/firestore';
@@ -35,8 +34,17 @@ type WhereFilterOp =
     | 'in'
     | 'not-in'
     | 'array-contains-any';
-type WhereCondition = [string, WhereFilterOp, unknown];
-type OrderByCondition = [string, 'asc' | 'desc'];
+
+interface WhereCondition {
+    field: string;
+    condition?: WhereFilterOp;
+    value: unknown;
+}
+
+interface OrderByCondition {
+    field: string;
+    value: 'asc' | 'desc';
+}
 
 interface QueryOptions {
     where?: WhereCondition[];
@@ -54,57 +62,75 @@ interface FirestoreOperations<T extends DocumentData> {
     lastVisible: DocumentSnapshot | null;
 
     // Read Operations
-    getCollection: (options?: QueryOptions) => Promise<T[]>;
-    getDocument: (id: string) => Promise<T | null>;
-    subscribe: (callback: (data: T[]) => void, options?: QueryOptions) => () => void;
+    getCollection: (collectionName: string, options?: QueryOptions) => Promise<T[]>;
+    getDocument: (collectionName: string, id: string) => Promise<T | null>;
+    subscribe: (
+        collectionName: string,
+        callback: (data: T[]) => void,
+        options?: QueryOptions
+    ) => () => void;
 
     // Write Operations
-    addDocument: (data: Omit<T, 'id'>, options?: { merge?: boolean }) => Promise<string>;
-    updateDocument: (id: string, data: Partial<T>) => Promise<void>;
-    updateDocuments: (data: Partial<T>, conditions?: WhereCondition[]) => Promise<number>;
-    deleteDocument: (id: string) => Promise<void>;
-    deleteDocuments: (conditions?: WhereCondition[]) => Promise<number>;
+    addDocument: (
+        collectionName: string,
+        data: Omit<T, 'id'>,
+        options?: { merge?: boolean }
+    ) => Promise<string>;
+    updateDocument: (collectionName: string, id: string, data: Partial<T>) => Promise<void>;
+    updateDocuments: (
+        collectionName: string,
+        data: Partial<T>,
+        conditions?: WhereCondition[]
+    ) => Promise<number>;
+    deleteDocument: (collectionName: string, id: string) => Promise<void>;
+    deleteDocuments: (collectionName: string, conditions?: WhereCondition[]) => Promise<number>;
 
     // Batch Operations
-    batchUpdate: (updates: Array<{ id: string; data: Partial<T> }>) => Promise<void>;
-    batchDelete: (ids: string[]) => Promise<void>;
+    batchUpdate: (
+        collectionName: string,
+        updates: Array<{ id: string; data: Partial<T> }>
+    ) => Promise<void>;
+    batchDelete: (collectionName: string, ids: string[]) => Promise<void>;
 
     // Pagination
-    getNextPage: (options?: Omit<QueryOptions, 'startAfterDoc'>) => Promise<T[]>;
+    getNextPage: (
+        collectionName: string,
+        options?: Omit<QueryOptions, 'startAfterDoc'>
+    ) => Promise<T[]>;
 }
 
 // ==================== Hook Implementation ====================
-const useFirestore = <T extends DocumentData>(
-    collectionPath: string,
-    initialOptions?: QueryOptions
-): FirestoreOperations<T> => {
+const useFirestore = <T extends DocumentData>(): FirestoreOperations<T> => {
     const [data, setData] = useState<T[] | T | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
 
-    const collectionRef = useMemo(() => collection(db, collectionPath), [collectionPath]);
+    const getCollectionRef = useCallback((collectionPath: string) => {
+        return collection(db, collectionPath);
+    }, []);
 
     const buildQuery = useCallback(
-        (options?: QueryOptions): Query<T> => {
+        (collectionPath: string, options?: QueryOptions): Query<T> => {
+            const collectionRef = getCollectionRef(collectionPath);
             const constraints: QueryConstraint[] = [];
 
             // Where conditions
-            const whereConditions = options?.where || initialOptions?.where;
+            const whereConditions = options?.where;
             if (whereConditions) {
-                whereConditions.forEach(([field, op, value]) => {
-                    constraints.push(where(field, op, value));
+                whereConditions.forEach(({ field, condition, value }) => {
+                    constraints.push(where(field, condition ?? '==', value));
                 });
             }
 
             // Ordering
-            const orderByCondition = options?.orderBy || initialOptions?.orderBy;
+            const orderByCondition = options?.orderBy;
             if (orderByCondition) {
-                constraints.push(orderBy(...orderByCondition));
+                constraints.push(orderBy(orderByCondition.field, orderByCondition.value));
             }
 
             // Limit
-            const queryLimit = options?.limit || initialOptions?.limit;
+            const queryLimit = options?.limit;
             if (queryLimit) {
                 constraints.push(limit(queryLimit));
             }
@@ -112,21 +138,19 @@ const useFirestore = <T extends DocumentData>(
             // Pagination
             if (options?.startAfterDoc) {
                 constraints.push(startAfter(options.startAfterDoc));
-            } else if (initialOptions?.startAfterDoc) {
-                constraints.push(startAfter(initialOptions.startAfterDoc));
             }
 
             return query(collectionRef, ...constraints) as Query<T>;
         },
-        [collectionRef, initialOptions]
+        [getCollectionRef]
     );
 
     // ==================== Read Operations ====================
     const getCollection = useCallback(
-        async (options?: QueryOptions): Promise<T[]> => {
+        async (collectionName: string, options?: QueryOptions): Promise<T[]> => {
             setLoading(true);
             try {
-                const querySnapshot = await getDocs(buildQuery(options));
+                const querySnapshot = await getDocs(buildQuery(collectionName, options));
                 const results = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
@@ -146,10 +170,10 @@ const useFirestore = <T extends DocumentData>(
     );
 
     const getDocument = useCallback(
-        async (id: string): Promise<T | null> => {
+        async (collectionName: string, id: string): Promise<T | null> => {
             setLoading(true);
             try {
-                const docRef = doc(db, collectionPath, id);
+                const docRef = doc(db, collectionName, id);
                 const snapshot = await getDoc(docRef);
 
                 if (!snapshot.exists()) {
@@ -167,14 +191,19 @@ const useFirestore = <T extends DocumentData>(
                 setLoading(false);
             }
         },
-        [collectionPath]
+        []
     );
 
     // ==================== Write Operations ====================
     const addDocument = useCallback(
-        async (data: Omit<T, 'id'>, options?: { merge?: boolean }): Promise<string> => {
+        async (
+            collectionName: string,
+            data: Omit<T, 'id'>,
+            options?: { merge?: boolean }
+        ): Promise<string> => {
             setLoading(true);
             try {
+                const collectionRef = getCollectionRef(collectionName);
                 const docData = {
                     ...data,
                     createdAt: serverTimestamp(),
@@ -190,14 +219,14 @@ const useFirestore = <T extends DocumentData>(
                 setLoading(false);
             }
         },
-        [collectionRef]
+        [getCollectionRef]
     );
 
     const updateDocument = useCallback(
-        async (id: string, data: Partial<T>): Promise<void> => {
+        async (collectionName: string, id: string, data: Partial<T>): Promise<void> => {
             setLoading(true);
             try {
-                const docRef = doc(db, collectionPath, id);
+                const docRef = doc(db, collectionName, id);
                 await updateDoc(docRef, {
                     ...data,
                     updatedAt: serverTimestamp(),
@@ -220,14 +249,18 @@ const useFirestore = <T extends DocumentData>(
                 setLoading(false);
             }
         },
-        [collectionPath]
+        []
     );
 
     const updateDocuments = useCallback(
-        async (data: Partial<T>, conditions?: WhereCondition[]): Promise<number> => {
+        async (
+            collectionName: string,
+            data: Partial<T>,
+            conditions?: WhereCondition[]
+        ): Promise<number> => {
             setLoading(true);
             try {
-                const q = buildQuery({ where: conditions });
+                const q = buildQuery(collectionName, { where: conditions });
                 const snapshot = await getDocs(q);
                 const batch = writeBatch(db);
 
@@ -264,10 +297,10 @@ const useFirestore = <T extends DocumentData>(
     );
 
     const deleteDocument = useCallback(
-        async (id: string): Promise<void> => {
+        async (collectionName: string, id: string): Promise<void> => {
             setLoading(true);
             try {
-                const docRef = doc(db, collectionPath, id);
+                const docRef = doc(db, collectionName, id);
                 await deleteDoc(docRef);
 
                 // Update local state
@@ -285,14 +318,14 @@ const useFirestore = <T extends DocumentData>(
                 setLoading(false);
             }
         },
-        [collectionPath]
+        []
     );
 
     const deleteDocuments = useCallback(
-        async (conditions?: WhereCondition[]): Promise<number> => {
+        async (collectionName: string, conditions?: WhereCondition[]): Promise<number> => {
             setLoading(true);
             try {
-                const q = buildQuery({ where: conditions });
+                const q = buildQuery(collectionName, { where: conditions });
                 const snapshot = await getDocs(q);
                 const batch = writeBatch(db);
 
@@ -327,13 +360,16 @@ const useFirestore = <T extends DocumentData>(
 
     // ==================== Batch Operations ====================
     const batchUpdate = useCallback(
-        async (updates: Array<{ id: string; data: Partial<T> }>): Promise<void> => {
+        async (
+            collectionName: string,
+            updates: Array<{ id: string; data: Partial<T> }>
+        ): Promise<void> => {
             setLoading(true);
             try {
                 const batch = writeBatch(db);
 
                 updates.forEach(({ id, data }) => {
-                    const docRef = doc(db, collectionPath, id);
+                    const docRef = doc(db, collectionName, id);
                     batch.update(docRef, {
                         ...data,
                         updatedAt: serverTimestamp(),
@@ -361,17 +397,17 @@ const useFirestore = <T extends DocumentData>(
                 setLoading(false);
             }
         },
-        [collectionPath]
+        []
     );
 
     const batchDelete = useCallback(
-        async (ids: string[]): Promise<void> => {
+        async (collectionName: string, ids: string[]): Promise<void> => {
             setLoading(true);
             try {
                 const batch = writeBatch(db);
 
                 ids.forEach((id) => {
-                    const docRef = doc(db, collectionPath, id);
+                    const docRef = doc(db, collectionName, id);
                     batch.delete(docRef);
                 });
 
@@ -392,13 +428,13 @@ const useFirestore = <T extends DocumentData>(
                 setLoading(false);
             }
         },
-        [collectionPath]
+        []
     );
 
     // ==================== Real-time Subscriptions ====================
     const subscribe = useCallback(
-        (callback: (data: T[]) => void, options?: QueryOptions) => {
-            const q = buildQuery(options);
+        (collectionName: string, callback: (data: T[]) => void, options?: QueryOptions) => {
+            const q = buildQuery(collectionName, options);
 
             const unsubscribe = onSnapshot(
                 q,
@@ -422,7 +458,10 @@ const useFirestore = <T extends DocumentData>(
 
     // ==================== Pagination ====================
     const getNextPage = useCallback(
-        async (options?: Omit<QueryOptions, 'startAfterDoc'>): Promise<T[]> => {
+        async (
+            collectionName: string,
+            options?: Omit<QueryOptions, 'startAfterDoc'>
+        ): Promise<T[]> => {
             if (!lastVisible) {
                 throw new Error('No more documents to load');
             }
@@ -430,7 +469,7 @@ const useFirestore = <T extends DocumentData>(
             setLoading(true);
             try {
                 const querySnapshot = await getDocs(
-                    buildQuery({
+                    buildQuery(collectionName, {
                         ...options,
                         startAfterDoc: lastVisible,
                     })
@@ -456,17 +495,6 @@ const useFirestore = <T extends DocumentData>(
         },
         [buildQuery, lastVisible]
     );
-
-    // ==================== Initial Data Load ====================
-    useEffect(() => {
-        if (initialOptions?.realtime) {
-            const unsubscribe = subscribe(() => {}, initialOptions);
-            return unsubscribe;
-        } else if (!data) {
-            // Only fetch if data is null
-            getCollection(initialOptions).catch(console.error);
-        }
-    }, [getCollection, subscribe, initialOptions, data]);
 
     return {
         // State

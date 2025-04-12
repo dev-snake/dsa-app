@@ -1,4 +1,5 @@
 import Header from './header';
+import Footer from './footer';
 import { Outlet } from 'react-router';
 interface MainLayoutProps {
     foo: string;
@@ -7,8 +8,9 @@ interface MainLayoutProps {
 const MainLayout = (props: MainLayoutProps) => {
     return (
         <>
-            <Header foo={props.foo} />
+            <Header title="AIgorithm & Data Structure simulation." />
             <Outlet />
+            <Footer title='Developed by Dang Van Hau.' />
         </>
     );
 };

@@ -2,19 +2,11 @@ import { Input } from '@/components/ui/input';
 import { useEffect, useState, useRef } from 'react';
 import sortImg from '@/assets/images/sort.png';
 import { Aperture } from 'lucide-react';
-import { collection, doc, getDocs } from 'firebase/firestore';
-import { db } from '@/configs/firebase/firebase.config';
-import { Button } from '@/components/ui/button';
 import useFirestore from '@/hooks/useFirestore';
+import { Button } from '@/components/ui/button';
 
 interface HomePageProps {
     foo: string;
-}
-interface Product {
-    id?: string;
-    name: string;
-    price: number;
-    category: string;
 }
 
 const HomePage = (_props: HomePageProps) => {
@@ -29,7 +21,7 @@ const HomePage = (_props: HomePageProps) => {
         'counting',
         'shell',
     ]);
-    const { data: products, getCollection, loading, error } = useFirestore<Product>('products');
+    const { getCollection, addDocument, loading, error } = useFirestore();
 
     const scrollContainersRef = useRef<HTMLDivElement[]>([]);
 
@@ -82,18 +74,16 @@ const HomePage = (_props: HomePageProps) => {
             });
         };
     }, []);
-    useEffect(() => {
-        getCollection({ orderBy: ['price', 'asc'] })
-    }, [getCollection]);
+
+
     if (loading) return <div>Đang tải...</div>;
     if (error) return <div>Lỗi: {error.message}</div>;
-    console.log('products', products);
     return (
-        <section className="px-8">
+        <section className="px-8 min-h-screen">
             <div className="max-w-sm mx-auto pt-12">
-                <h1 className="font-silkscreen text-center text-5xl pb-4 ">
+                <h1 className="font-silkscreen text-center text-5xl pb-4 max-sm:text-3xl ">
                     Algo<span className="text-orange-400 font-silkscreen">Viz</span>
-                    <span className="font-silkscreen text-xl">.dev</span>
+                    <span className="font-silkscreen text-xl  max-sm:text-xs">.dev</span>
                 </h1>
                 <div>
                     <Input type="text" placeholder="Search here..." className="bg-white" />

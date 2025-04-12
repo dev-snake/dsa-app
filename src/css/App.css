@@ -1,8 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
+
 * {
   font-family: 'Source Code Pro', monospace !important;
 }
-body{
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+
+  /* IE và Edge */
+  &::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari và Opera */
+  }
+}
+
+body {
   background: #eeeeee;
+
+
 }
