@@ -5,9 +5,16 @@ import { Aperture } from 'lucide-react';
 import { collection, doc, getDocs } from 'firebase/firestore';
 import { db } from '@/configs/firebase/firebase.config';
 import { Button } from '@/components/ui/button';
+import useFirestore from '@/hooks/useFirestore';
 
 interface HomePageProps {
     foo: string;
+}
+interface Product {
+    id?: string;
+    name: string;
+    price: number;
+    category: string;
 }
 
 const HomePage = (_props: HomePageProps) => {
@@ -22,6 +29,7 @@ const HomePage = (_props: HomePageProps) => {
         'counting',
         'shell',
     ]);
+    const { data: products, getCollection, loading, error } = useFirestore<Product>('products');
 
     const scrollContainersRef = useRef<HTMLDivElement[]>([]);
 
@@ -75,22 +83,13 @@ const HomePage = (_props: HomePageProps) => {
         };
     }, []);
     useEffect(() => {
-        const testConnection = async () => {
-            try {
-                const snapshot = await getDocs(collection(db, 'testCollection'));
-                console.log('✅ Firebase hoạt động: ', snapshot.size, 'tài liệu');
-            } catch (error) {
-                console.error('❌ Firebase không hoạt động:', error);
-            }
-        };
-
-        testConnection();
-    }, []);
-
-    // console.log(process.env.NODE_ENV === 'development' ? 'dev' : 'production');
+        getCollection({ orderBy: ['price', 'asc'] })
+    }, [getCollection]);
+    if (loading) return <div>Đang tải...</div>;
+    if (error) return <div>Lỗi: {error.message}</div>;
+    console.log('products', products);
     return (
         <section className="px-8">
-            <Button className="mt-2">test firebase</Button>
             <div className="max-w-sm mx-auto pt-12">
                 <h1 className="font-silkscreen text-center text-5xl pb-4 ">
                     Algo<span className="text-orange-400 font-silkscreen">Viz</span>
