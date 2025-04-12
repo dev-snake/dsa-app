@@ -1,20 +1,9 @@
 import React, { createContext, useContext } from 'react';
 import { useState } from 'react';
-// types.ts
-export type ThemeType = 'light' | 'dark';
-export type LanguageType = 'vi' | 'en' ;
-
+import { AppContextType, LanguageType, ThemeType } from '@/types/app';
 interface AppProviderProps {
     children: React.ReactNode;
 }
-
-interface AppContextType {
-    theme: 'light' | 'dark';
-    toggleTheme: () => void;
-    language: 'vi' | 'en';
-    setLanguage: React.Dispatch<React.SetStateAction<'vi' | 'en'>>;
-}
-
 export const AppContext = createContext<AppContextType>({
     theme: 'light',
     toggleTheme: () => {},

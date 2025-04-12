@@ -5,18 +5,6 @@ const router = createBrowserRouter([
     {
         path: '/',
         element: <MainLayout />,
-        // loader: async () => {
-        //     const { default: HomePage } = await import('@/pages/home-page');
-        //     return { HomePage };
-        // },
-        // action: async () => {
-        //     const { default: HomePage } = await import('@/pages/home-page');
-        //     return { HomePage };
-        // },
-        // handle: {
-        //     breadcrumb: 'Home',
-        // },
-
         children: [
             {
                 path: '/',
