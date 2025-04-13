@@ -34,26 +34,23 @@ interface HeaderProps {
     title: string;
 }
 
-const Header = ({ title }: HeaderProps) => (
-    <header className="bg-gray-900 flex justify-between items-center px-12 max-sm:px-8 max-sm:py-2">
-        <h1 className="font-silkscreen text-center text-white text-3xl  max-sm:text-xl ">
-            Algo<span className="text-orange-400 font-silkscreen">Viz</span>
-            <span className="font-silkscreen text-xl  max-sm:text-xs">.dev</span>
-        </h1>
-        <h1 className="uppercase py-3 text-center text-white font-bold  max-sm:hidden">{title}</h1>
-        {/* <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>CN</AvatarFallback>
-        </Avatar> */}
-        <div className=''>
-            <DropdownMenu>
+const Header = ({ title }: HeaderProps) => {
+    return (
+        <header className="bg-gray-900 flex justify-between items-center px-12 max-sm:px-8 max-sm:py-2 fixed top-0 w-full z-50 shadow-lg">
+            <h1 className="font-silkscreen text-center text-white text-3xl  max-sm:text-xl ">
+                Algo<span className="text-orange-400 font-silkscreen">Viz</span>
+                <span className="font-silkscreen text-xl  max-sm:text-xs">.dev</span>
+            </h1>
+            <h1 className="uppercase py-3 text-center text-white font-bold  max-sm:hidden">{title}</h1>
+            <div className="">
+                <Button
+                    variant="ghost"
+                    className="border-2 text-white font-silkscreen hover:cursor-pointer"
+                >
+                    Login
+                </Button>
+                {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Avatar>
-                        <AvatarImage src="https://github.com/shadcn.png" className='hover:cursor-pointer' />
-                        <AvatarFallback >
-                            <span className='uppercase text-xs'>log</span>
-                        </AvatarFallback>
-                    </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-52 mr-4 mt-2">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -76,10 +73,11 @@ const Header = ({ title }: HeaderProps) => (
                         <span className='text-red-600'>Log out</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
-    </header>
-);
+            </DropdownMenu> */}
+            </div>
+        </header>
+    );
+};
 
 Header.defaultProps = {
     foo: 'bar',

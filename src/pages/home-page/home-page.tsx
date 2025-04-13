@@ -4,7 +4,8 @@ import sortImg from '@/assets/images/sort.png';
 import { Aperture } from 'lucide-react';
 import useFirestore from '@/hooks/useFirestore';
 import { Button } from '@/components/ui/button';
-
+import { Link } from 'react-router';
+import ROUTES from '@/configs/routes.config';
 interface HomePageProps {
     foo: string;
 }
@@ -75,11 +76,10 @@ const HomePage = (_props: HomePageProps) => {
         };
     }, []);
 
-
     if (loading) return <div>Đang tải...</div>;
     if (error) return <div>Lỗi: {error.message}</div>;
     return (
-        <section className="px-8 min-h-screen">
+        <section className="px-8 pt-14 min-h-screen">
             <div className="max-w-sm mx-auto pt-12">
                 <h1 className="font-silkscreen text-center text-5xl pb-4 max-sm:text-3xl ">
                     Algo<span className="text-orange-400 font-silkscreen">Viz</span>
@@ -94,9 +94,12 @@ const HomePage = (_props: HomePageProps) => {
                     <div className="p-2 shadow overflow-hidden bg-white" key={key}>
                         <img src={sortImg} alt="error" className="h-52 w-full" />
                         <div className="flex justify-between items-center pt-2">
-                            <span className="text-xs font-bold hover:cursor-pointer hover:opacity-55 transition-opacity">
+                            <Link
+                                to={ROUTES.PUBLIC.SORTING}
+                                className="text-xs font-bold hover:cursor-pointer hover:opacity-55 transition-opacity"
+                            >
                                 Array
-                            </span>
+                            </Link>
                             <Aperture className="h-4" />
                         </div>
                         <div
