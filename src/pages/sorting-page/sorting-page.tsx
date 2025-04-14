@@ -1,7 +1,4 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ChevronRight } from 'lucide-react';
-
 interface SortingPageProps {
     foo: string;
 }
@@ -37,6 +34,8 @@ const SortingPage = (props: SortingPageProps) => {
                             placeholder="N"
                             className="bg-white h-full inline-block outline-none text-xs px-2 max-w-14"
                             defaultValue={10}
+                            max={20}
+                            min={1}
                         />
                         <button className="bg-green-400 block text-xs h-full px-2 uppercase text-white tracking-wide rounded-xs hover:cursor-pointer">
                             random
