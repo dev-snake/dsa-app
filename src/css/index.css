@@ -152,11 +152,43 @@
 
 
 }
+
 @utility scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
+
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@utility animation-show-in {
+  animation: show-in 0.5s linear;
+  width: 100%;
+}
+
+@utility animation-show-out {
+  animation: show-out 0.5s linear;
+  width: 0%;
+}
+
+@keyframes show-in {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes show-out {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
   }
 }
 
@@ -187,10 +219,12 @@
     --chart-5: 340 75% 55%;
   }
 }
-@keyframes animate-marquee{
+
+@keyframes animate-marquee {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-100%);
   }
