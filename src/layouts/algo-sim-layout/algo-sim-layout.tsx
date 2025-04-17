@@ -1,8 +1,7 @@
 import Logo from '@/components/logo';
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
 interface AlgoSimLayoutProps {
     foo?: string;
 }
@@ -20,10 +19,10 @@ const AlgoSimLayout = (_props: AlgoSimLayoutProps) => {
         'shell',
     ]);
     return (
-        <section className="min-h-screen relative">
-            <header className="bg-gray-800 text-white py-2 px-12 max-sm:px-4 flex flex-col">
-                <nav className="flex justify-between max-sm:justify-center items-center">
-                    <ul className="flex gap-x-4 max-sm:gap-x-2 max-sm:gap-y-1 max-sm:flex-wrap uppercase">
+        <section className="relative min-h-screen">
+            <header className="flex flex-col px-12 py-2 text-white bg-gray-800 max-sm:px-4">
+                <nav className="flex items-center justify-between max-sm:justify-center">
+                    <ul className="flex uppercase gap-x-4 max-sm:gap-x-2 max-sm:gap-y-1 max-sm:flex-wrap">
                         {sortingAlgorithms.map((algo) => (
                             <li
                                 key={algo}
@@ -38,7 +37,7 @@ const AlgoSimLayout = (_props: AlgoSimLayoutProps) => {
                     </div>
                 </nav>
             </header>
-            <main className="px-12 py-10">
+            <main className="px-12 py-10 mt-28">
                 <Outlet />
             </main>
         </section>

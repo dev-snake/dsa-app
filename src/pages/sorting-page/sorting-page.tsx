@@ -12,6 +12,7 @@ interface IActiveMounted {
 const SortingPage = (props: SortingPageProps) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [isOptions, setIsOptions] = useState<boolean>(false);
+    const [randomNumbers, setRandomNumbers] = useState<number[]>([29, 10, 14, 37, 14]);
     const [mounted, setMounted] = useState<IActiveMounted>({
         isActive: true,
     } as IActiveMounted);
@@ -27,18 +28,18 @@ const SortingPage = (props: SortingPageProps) => {
     };
     return (
         <div>
-            <div className="flex gap-x-2 justify-center">
-                {Array.from({ length: 22 }).map((_, idx) => (
+            <div className="flex justify-center gap-x-2">
+                {randomNumbers.map((value, idx) => (
                     <div
                         key={idx}
-                        className="w-full  bg-blue-200 rounded-xs my-2 max-w-14 h-48 text-center"
+                        className="text-center text-gray-800 bg-orange-400 select-none ring-3 ring-orange-200 size-14 rounded-xs"
                     >
-                        {idx}
+                        <span className="text-2xl font-bold leading-14 ">{value}</span>
                     </div>
                 ))}
             </div>
-            <div className="absolute bottom-8 left-2  rounded-xs shadow bg-green-400 hover:cursor-pointer select-none">
-                <div className="py-5 px-2 text-white " onClick={handleMounted}>
+            <div className="absolute bg-green-400 shadow select-none bottom-8 left-2 rounded-xs hover:cursor-pointer">
+                <div className="px-2 py-5 text-white " onClick={handleMounted}>
                     <ChevronRight
                         className={cn('', {
                             'rotate-180 transition-all duration-500': isActive,
@@ -66,7 +67,6 @@ const SortingPage = (props: SortingPageProps) => {
                         <button
                             className={cn('text-xs w-full h-1/2 relative z-10 px-4   uppercase ', {
                                 'text-white hover:bg-green-500 z-0 hover:cursor-pointer': isActive,
-                             
                             })}
                             onClick={() => setIsOptions((prev) => !prev)}
                         >
@@ -102,30 +102,30 @@ const SortingPage = (props: SortingPageProps) => {
                             }
                         )}
                     >
-                        <div className="flex h-full items-center gap-x-1">
+                        <div className="flex items-center h-full gap-x-1">
                             <span className="whitespace-nowrap">N =</span>
                             <input
                                 type="number"
                                 placeholder="N"
-                                className="bg-white h-full inline-block outline-none text-xs px-2 max-w-14"
+                                className="inline-block h-full px-2 text-xs bg-white outline-none max-w-14"
                                 defaultValue={10}
                                 max={22}
                                 min={1}
                             />
-                            <button className="bg-green-400 block text-xs h-full px-2 uppercase text-white tracking-wide rounded-xs hover:cursor-pointer">
+                            <button className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer">
                                 random
                             </button>
-                            <button className="bg-green-400 block text-xs h-full px-2 uppercase text-white tracking-wide rounded-xs hover:cursor-pointer">
+                            <button className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer">
                                 sorted
                             </button>
                             <span className="whitespace-nowrap">N =</span>
                             <input
                                 type="text"
                                 placeholder="1,2,3,4,..."
-                                className="bg-white h-full inline-block outline-none text-xs px-2 min-w-14"
+                                className="inline-block h-full px-2 text-xs bg-white outline-none min-w-14"
                                 defaultValue={[29, 10, 14, 37, 14].join(',')}
                             />
-                            <button className="bg-green-400 block text-xs h-full px-2 uppercase text-white tracking-wide rounded-xs hover:cursor-pointer">
+                            <button className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer">
                                 Go
                             </button>
                         </div>
