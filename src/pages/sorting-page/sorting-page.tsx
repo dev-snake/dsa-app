@@ -11,10 +11,17 @@ interface IActiveMounted {
 
 const SortingPage = (props: SortingPageProps) => {
     const [isActive, setIsActive] = useState<boolean>(false);
+    const [isOptions, setIsOptions] = useState<boolean>(false);
     const [mounted, setMounted] = useState<IActiveMounted>({
         isActive: true,
     } as IActiveMounted);
     const handleMounted = () => {
+        setIsActive((prev) => {
+            if (prev) {
+                setIsOptions(false);
+            }
+            return !prev;
+        });
         if (mounted.count === 1) return;
         setMounted({ isActive: false, count: 1 });
     };
@@ -31,13 +38,12 @@ const SortingPage = (props: SortingPageProps) => {
                 ))}
             </div>
             <div className="absolute bottom-8 left-2  rounded-xs shadow bg-green-400 hover:cursor-pointer select-none">
-                <div className="py-5 px-2 text-white " onClick={() => setIsActive(!isActive)}>
+                <div className="py-5 px-2 text-white " onClick={handleMounted}>
                     <ChevronRight
-                        className={cn({
+                        className={cn('', {
                             'rotate-180 transition-all duration-500': isActive,
                             'rotate-0 transition-all duration-500': !isActive,
                         })}
-                        onClick={handleMounted}
                     />
                 </div>
                 <div
@@ -52,7 +58,7 @@ const SortingPage = (props: SortingPageProps) => {
                             {
                                 'before:absolute before:block before:bg-green-400 shadow    before:animation-show-in before:h-full ':
                                     isActive,
-                                'before:absolute before:block before:bg-green-400 z-20    before:animation-show-out before:h-full ':
+                                'before:absolute before:block before:bg-green-400 z-20 pointer-events-none   before:animation-show-out before:h-full ':
                                     !isActive,
                             }
                         )}
@@ -60,19 +66,42 @@ const SortingPage = (props: SortingPageProps) => {
                         <button
                             className={cn('text-xs w-full h-1/2 relative z-10 px-4   uppercase ', {
                                 'text-white hover:bg-green-500 z-0 hover:cursor-pointer': isActive,
+                             
                             })}
+                            onClick={() => setIsOptions((prev) => !prev)}
                         >
-                            <span className={cn({ 'opacity-0 transition-all duration-200 text-transparent': !isActive })}>Create(A)</span>
+                            <span
+                                className={cn({
+                                    'opacity-0 transition-all duration-200 text-transparent ':
+                                        !isActive,
+                                })}
+                            >
+                                Create(A)
+                            </span>
                         </button>
                         <button
-                            className={cn('text-xs w-full h-1/2 relative z-10 px-4   uppercase transi ', {
+                            className={cn('text-xs w-full h-1/2 relative z-10 px-4   uppercase  ', {
                                 'text-white hover:bg-green-500 z-0 hover:cursor-pointer': isActive,
                             })}
                         >
-                            <span className={cn({ 'opacity-0 transition-all duration-200 text-transparent': !isActive })}>Sort(B)</span>
+                            <span
+                                className={cn({
+                                    'opacity-0 transition-all duration-200 text-transparent':
+                                        !isActive,
+                                })}
+                            >
+                                Sort(B)
+                            </span>
                         </button>
                     </div>
-                    <div className="absolute top-0 left-36 ml-1  h-1/2 py-1 hidden">
+                    <div
+                        className={cn(
+                            'absolute top-0 left-36 ml-1  h-1/2 py-1 transition-all duration-700',
+                            {
+                                'opacity-0 ': !isOptions,
+                            }
+                        )}
+                    >
                         <div className="flex h-full items-center gap-x-1">
                             <span className="whitespace-nowrap">N =</span>
                             <input
