@@ -13,6 +13,7 @@ const SortingPage = (props: SortingPageProps) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [isOptions, setIsOptions] = useState<boolean>(false);
     const [randomNumbers, setRandomNumbers] = useState<number[]>([29, 10, 14, 37, 14]);
+    const [N, setN] = useState<number>(10);
     const [mounted, setMounted] = useState<IActiveMounted>({
         isActive: true,
     } as IActiveMounted);
@@ -26,18 +27,49 @@ const SortingPage = (props: SortingPageProps) => {
         if (mounted.count === 1) return;
         setMounted({ isActive: false, count: 1 });
     };
+    const handleRandomNumbers = () => {
+        const newNumbers = [...Array(N).keys()];
+        for (let index = 0; index < newNumbers.length; index++) {
+            const newValue = Math.floor(Math.random() * 100);
+            newNumbers[index] = newValue;
+        }
+        setRandomNumbers(newNumbers);
+    };
+    const sortArray = () => {
+        const newNumbers: number[] = JSON.parse(JSON.stringify(randomNumbers));
+        return setRandomNumbers(newNumbers.sort((a, b) => a - b));
+    };
     return (
         <div>
-            <div className="flex justify-center gap-x-2">
-                {randomNumbers.map((value, idx) => (
-                    <div
-                        key={idx}
-                        className="text-center text-gray-800 bg-orange-400 select-none ring-3 ring-orange-200 size-14 rounded-xs"
-                    >
-                        <span className="text-2xl font-bold leading-14 ">{value}</span>
-                    </div>
-                ))}
+            <div className="flex justify-center items-end gap-x-2  h-40">
+                {randomNumbers.map((value, idx) => {
+                    const maxValue = Math.max(...randomNumbers);
+                    const heightPercent = (value / maxValue) * 100;
+
+                    return (
+                            <div
+                                key={idx}
+                                style={
+                                    {
+                                        height: `${heightPercent}%`,
+                                        '--value': `"${value}"`,
+                                    } as React.CSSProperties
+                                }
+                                className={cn(
+                                    'relative  w-14 bg-blue-200 flex h-full flex-col justify-end items-center rounded-xs text-gray-800 transition-all duration-400 ease-in-out',
+                                    value < 14
+                                        ? 'before:content-[var(--value)] before:absolute before:-top-7 before:text-xl before:text-gray-600'
+                                        : ''
+                                )}
+                            >
+                                <span className={cn('text-xl', { hidden: value < 14 })}>
+                                    {value}
+                                </span>
+                            </div>
+                    );
+                })}
             </div>
+
             <div className="absolute bg-green-400 shadow select-none bottom-8 left-2 rounded-xs hover:cursor-pointer">
                 <div className="px-2 py-5 text-white " onClick={handleMounted}>
                     <ChevronRight
@@ -108,14 +140,22 @@ const SortingPage = (props: SortingPageProps) => {
                                 type="number"
                                 placeholder="N"
                                 className="inline-block h-full px-2 text-xs bg-white outline-none max-w-14"
-                                defaultValue={10}
+                                defaultValue={N}
+                                onChange={(e) => setN(+e.target.value)}
                                 max={22}
                                 min={1}
                             />
-                            <button className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer">
+
+                            <button
+                                className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer"
+                                onClick={handleRandomNumbers}
+                            >
                                 random
                             </button>
-                            <button className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer">
+                            <button
+                                className="block h-full px-2 text-xs tracking-wide text-white uppercase bg-green-400 rounded-xs hover:cursor-pointer"
+                                onClick={sortArray}
+                            >
                                 sorted
                             </button>
                             <span className="whitespace-nowrap">N =</span>

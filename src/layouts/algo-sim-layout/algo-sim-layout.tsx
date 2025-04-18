@@ -26,7 +26,7 @@ const AlgoSimLayout = (_props: AlgoSimLayoutProps) => {
                         {sortingAlgorithms.map((algo) => (
                             <li
                                 key={algo}
-                                className="opacity-30 first:opacity-100 hover:cursor-pointer max-sm:text-xs"
+                                className="opacity-30 first:opacity-100 hover:cursor-pointer text-xs"
                             >
                                 {algo}
                             </li>

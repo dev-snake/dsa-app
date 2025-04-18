@@ -22,6 +22,7 @@ const HomePage = (_props: HomePageProps) => {
         'counting',
         'shell',
     ]);
+    const [search, setSearch] = useState<string>('');
     const { getCollection, addDocument, loading, error } = useFirestore();
 
     const scrollContainersRef = useRef<HTMLDivElement[]>([]);
@@ -75,7 +76,22 @@ const HomePage = (_props: HomePageProps) => {
             });
         };
     }, []);
-
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            getPosts();
+        }, 1000);
+        return () => clearTimeout(delayDebounce);
+    }, [search]);
+    const getPosts = async () => {
+        try {
+            const res = await fetch('https://jsonplaceholder.typicode.com/posts');
+            const data = await res.json();
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.log(error);
+        }
+    };
     if (loading) return <div>Đang tải...</div>;
     if (error) return <div>Lỗi: {error.message}</div>;
     return (
@@ -86,7 +102,12 @@ const HomePage = (_props: HomePageProps) => {
                     <span className="font-silkscreen text-xl  max-sm:text-xs">.dev</span>
                 </h1>
                 <div>
-                    <Input type="text" placeholder="Search here..." className="bg-white" />
+                    <Input
+                        type="text"
+                        placeholder="Search here..."
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="bg-white"
+                    />
                 </div>
             </div>
             <div className="grid grid-cols-5 max-xl:grid-cols-4 max-lg:grid-cols-3 max-md:grid-cols-2 max-[540px]:!grid-cols-1 max-[540px]:px-0  py-8 px-4 gap-6 justify-center">
